@@ -1,9 +1,11 @@
 ---
 name: delivery
-description: Use when creating or revising reports, documents, spreadsheets, presentations, or transferring established content between applications. Do not trigger for a calculation, code change, brief translation, or light wording edit alone; scientific inference belongs to research and software behavior changes belong to engineering.
+description: 创建或修改报告、文档、表格、演示及跨应用交付。仅计算、程序改动、短翻译或轻微润色时不触发；科研推断使用科研入口，程序行为修改使用工程入口。
 ---
 
 # 务实交付与协作
+
+宿主已经注入本技能完整正文时直接使用，不重复调用技能工具。下面的相对路径从宿主提供的技能目录或资源基准解析，不能以当前项目目录代替。
 
 根据用户要得到的交付物和当前动作选择规则。当前会话已加载“务实工程与表达”共同约束时复用；否则读取 [共同约束](references/common.md)。不假定运行环境会自动加载某种全局指令文件。内容未变且已加载时不重复读取。
 

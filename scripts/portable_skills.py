@@ -22,10 +22,39 @@ SKILLS = ("research", "engineering", "delivery")
 SHARED_FILES = ("common.md", "applications.md")
 MARKER = ".practical-work-managed.json"
 MARKER_VERSION = 1  # Ownership file format, not the package release version.
+TARGETS = {
+    "deepseek-harness": (".dsh/skills", ".dsh/skills"),
+    "antigravity": (".agents/skills", ".gemini/config/skills"),
+    "antigravity-cli": (".agents/skills", ".gemini/antigravity-cli/skills"),
+    "codebuddy": (".codebuddy/skills", ".codebuddy/skills"),
+}
 
 
 class PortableSkillsError(ValueError):
     """An input or destination cannot be used without losing unrelated files."""
+
+
+def target_directory(target: str, scope: str, project: Path | None = None) -> Path:
+    """Resolve a documented default; custom host configuration uses --output."""
+    if target not in TARGETS or scope not in ("project", "user"):
+        raise PortableSkillsError("Unknown target or scope")
+    project_path, user_path = TARGETS[target]
+    if scope == "user":
+        if project is not None:
+            raise PortableSkillsError("--project cannot be combined with --scope user")
+        if target == "deepseek-harness" and os.environ.get("DSH_HOME"):
+            return _absolute(Path(os.environ["DSH_HOME"])) / "skills"
+        return Path.home() / user_path
+    if project is None:
+        raise PortableSkillsError("Project scope requires --project pointing to an existing project")
+    project = _absolute(project)
+    _check_path(project)
+    if not project.is_dir():
+        raise PortableSkillsError(f"Project is not an existing directory: {project}")
+    if target == "deepseek-harness":
+        # The first-party filesystem provider uses the nearest .git ancestor.
+        project = next((p for p in (project, *project.parents) if (p / ".git").exists()), project)
+    return project / project_path
 
 
 def _absolute(path: Path) -> Path:
@@ -267,7 +296,11 @@ def main(argv: list[str] | None = None, *, root: Path | None = None) -> int:
     sync_parser = commands.add_parser("sync", help="Generate shared skill references")
     sync_parser.add_argument("--check", action="store_true", help="Report differences without writing")
     export_parser = commands.add_parser("export", help="Export three portable skill directories")
-    export_parser.add_argument("--output", required=True, type=Path, help="Destination outside this repository")
+    destination = export_parser.add_mutually_exclusive_group(required=True)
+    destination.add_argument("--output", type=Path, help="Explicit destination outside this repository")
+    destination.add_argument("--target", choices=tuple(TARGETS), help="Use a client's documented default skills directory")
+    export_parser.add_argument("--scope", choices=("project", "user"), default=None, help="Target scope (default: project)")
+    export_parser.add_argument("--project", type=Path, help="Existing project root for --target")
     args = parser.parse_args(argv)
     root = root if root is not None else Path(__file__).resolve().parent.parent
     try:
@@ -276,7 +309,13 @@ def main(argv: list[str] | None = None, *, root: Path | None = None) -> int:
             for path in differences:
                 print(f"{'Different' if args.check else 'Generated'}: {path}")
             return 1 if args.check and differences else 0
-        for directory in export(root, args.output):
+        if args.output is not None:
+            if args.scope is not None or args.project is not None:
+                raise PortableSkillsError("--scope and --project are only valid with --target")
+            output = args.output
+        else:
+            output = target_directory(args.target, args.scope or "project", args.project)
+        for directory in export(root, output):
             print(f"Exported: {directory}")
         return 0
     except (PortableSkillsError, OSError) as exc:

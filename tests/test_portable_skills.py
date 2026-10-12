@@ -13,6 +13,7 @@ import shutil
 import subprocess
 import tempfile
 import unittest
+from unittest.mock import patch
 
 
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "portable_skills.py"
@@ -260,6 +261,47 @@ class PortableSkillsTests(unittest.TestCase):
         with self.assertRaisesRegex(portable.PortableSkillsError, "Unsafe managed file path"):
             self.export()
         self.assertEqual(outside.read_text(encoding="utf-8"), "保留")
+
+    def test_target_project_export_uses_native_roots_without_changing_settings(self):
+        project = self.base / "project"
+        project.mkdir()
+        expected = {
+            "deepseek-harness": ".dsh/skills",
+            "antigravity": ".agents/skills",
+            "antigravity-cli": ".agents/skills",
+            "codebuddy": ".codebuddy/skills",
+        }
+        for target, relative in expected.items():
+            with self.subTest(target=target):
+                self.assertEqual(self.run_main("export", "--target", target, "--project", str(project)), 0)
+                entry = project / relative / "practical-work-engineering" / "SKILL.md"
+                self.assertTrue(entry.is_file())
+                self.assertTrue((entry.parent / "references" / "common.md").is_file())
+        self.assertFalse((project / "AGENTS.md").exists())
+        self.assertFalse((project / ".dsh" / "config.yaml").exists())
+
+    def test_dsh_target_uses_nearest_git_ancestor_and_dsh_home(self):
+        project = self.base / "project"
+        project.mkdir()
+        (project / ".git").write_text("gitdir: elsewhere", encoding="utf-8")
+        nested = project / "nested"
+        nested.mkdir()
+        self.assertEqual(portable.target_directory("deepseek-harness", "project", nested), project / ".dsh/skills")
+        with patch.dict(os.environ, {"DSH_HOME": str(self.base / "custom-dsh")}):
+            self.assertEqual(portable.target_directory("deepseek-harness", "user"), self.base / "custom-dsh/skills")
+
+    def test_target_scope_requires_explicit_project_and_user_locations_are_distinct(self):
+        self.assertEqual(self.run_main("export", "--target", "antigravity"), 2)
+        self.assertFalse(self.output.exists())
+        self.assertEqual(self.run_main("export", "--target", "codebuddy", "--project", str(self.base / "missing")), 2)
+        self.assertEqual(self.run_main("export", "--output", str(self.output), "--scope", "user"), 2)
+        with patch.object(Path, "home", return_value=self.base / "user"):
+            self.assertEqual(portable.target_directory("antigravity", "user"), self.base / "user/.gemini/config/skills")
+            self.assertEqual(portable.target_directory("antigravity-cli", "user"), self.base / "user/.gemini/antigravity-cli/skills")
+            self.assertEqual(portable.target_directory("codebuddy", "user"), self.base / "user/.codebuddy/skills")
+            self.assertEqual(self.run_main("export", "--target", "antigravity", "--scope", "user"), 0)
+            self.assertTrue((self.base / "user/.gemini/config/skills/practical-work-delivery/SKILL.md").is_file())
+            self.assertEqual(self.run_main("export", "--target", "antigravity", "--scope", "user", "--project", str(self.base)), 2)
 
 
 if __name__ == "__main__":
