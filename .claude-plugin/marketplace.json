@@ -1,0 +1,12 @@
+{
+  "name": "practical-work-marketplace",
+  "description": "Research, engineering, and delivery skills from Practical Work.",
+  "owner": { "name": "Aliarrrrr" },
+  "plugins": [
+    {
+      "name": "practical-work",
+      "source": ".",
+      "description": "Task-specific research, engineering, and delivery guidance."
+    }
+  ]
+}
