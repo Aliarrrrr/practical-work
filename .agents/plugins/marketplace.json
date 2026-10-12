@@ -1,0 +1,20 @@
+{
+  "name": "practical-work",
+  "interface": {
+    "displayName": "务实科研、工程与交付"
+  },
+  "plugins": [
+    {
+      "name": "practical-work",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

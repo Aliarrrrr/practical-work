@@ -1,0 +1,6 @@
+interface:
+  display_name: "务实交付与协作"
+  short_description: "按交付对象选择文档、表格、演示和跨应用规则，使用已有操作能力。"
+  default_prompt: "使用 $delivery 将当前内容整理成所需交付物，并只加载对应场景和应用规则。"
+policy:
+  allow_implicit_invocation: true

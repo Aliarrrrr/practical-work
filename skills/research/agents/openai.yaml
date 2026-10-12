@@ -1,0 +1,6 @@
+interface:
+  display_name: "务实科研"
+  short_description: "理解研究文献、设计比较、复现计算结果并解释科学数据的统计分析"
+  default_prompt: "使用 $research 帮我完成当前科研任务，只采用与研究问题和现有材料有关的方法，并说明结果适用的范围。"
+policy:
+  allow_implicit_invocation: true

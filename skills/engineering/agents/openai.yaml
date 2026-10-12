@@ -1,0 +1,6 @@
+interface:
+  display_name: "务实工程"
+  short_description: "按当前动作处理实现、排错、审查、配置与发布迁移，保留必要检查"
+  default_prompt: "请用 $engineering 处理当前工程任务，结合现有实现完成必要改动与检查。"
+policy:
+  allow_implicit_invocation: true
