@@ -35,6 +35,7 @@ class PackageSkillsTests(unittest.TestCase):
         (self.root / "references").mkdir(parents=True)
         (self.root / "references" / "common.md").write_bytes("# 共同约束\r\n具体内容\r\n".encode("utf-8"))
         (self.root / "references" / "applications.md").write_text("# 选择可用能力\n", encoding="utf-8")
+        (self.root / "references" / "customization.md").write_text("# 可选定制\n", encoding="utf-8")
         (self.root / "plugin.json").write_text(json.dumps({
             "name": "practical-work", "version": "0.3.0", "description": "科研、工程与交付",
             "repository": "https://example.com/practical-work", "extensions": {"com.openai": {"interface": {"category": "Productivity"}}},
@@ -49,7 +50,7 @@ class PackageSkillsTests(unittest.TestCase):
             (source / "SKILL.md").write_bytes(
                 (f"---\r\nname: {skill}\r\ndescription: 处理当前{skill}任务\r\n---\r\n"
                  "[共同约束](references/common.md)\r\n[应用](references/applications.md)\r\n"
-                 "[场景](references/scenario.md)\r\n").encode("utf-8")
+                 "[场景](references/scenario.md)\r\n[可选定制](references/customization.md)\r\n").encode("utf-8")
             )
             (source / "references" / "scenario.md").write_text("# 场景材料\n", encoding="utf-8")
             (source / "agents" / "openai.yaml").write_text(

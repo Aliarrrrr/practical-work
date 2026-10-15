@@ -19,7 +19,7 @@ import tempfile
 
 PACKAGE = "practical-work"
 SKILLS = ("research", "engineering", "delivery")
-SHARED_FILES = ("common.md", "applications.md")
+SHARED_FILES = ("common.md", "applications.md", "customization.md")
 MARKER = ".practical-work-managed.json"
 MARKER_VERSION = 1  # Ownership file format, not the package release version.
 TARGETS = {
@@ -120,7 +120,7 @@ def _write_file(path: Path, data: bytes) -> None:
 
 
 def sync(root: Path, *, check: bool = False) -> list[Path]:
-    """Generate the two shared files in each canonical skill; return differences."""
+    """Generate shared files in each canonical skill; return differences."""
     root = _absolute(root)
     shared = _shared_data(root)
     planned = []

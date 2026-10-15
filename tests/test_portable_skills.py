@@ -32,6 +32,7 @@ class PortableSkillsTests(unittest.TestCase):
         (self.root / "references").mkdir(parents=True)
         (self.root / "references" / "common.md").write_bytes("\ufeff# 共同约束\r\n中文内容\r\n".encode("utf-8"))
         (self.root / "references" / "applications.md").write_bytes("# 应用选择\r可用能力\r".encode("utf-8"))
+        (self.root / "references" / "customization.md").write_text("# 可选定制\n", encoding="utf-8")
         for skill in portable.SKILLS:
             source = self.root / "skills" / skill
             (source / "references").mkdir(parents=True)
@@ -40,7 +41,8 @@ class PortableSkillsTests(unittest.TestCase):
             (source / "SKILL.md").write_bytes(
                 (f"---\r\nname: {skill}\r\ndescription: 中文说明\r\n---\r\n\r\n"
                  "# 当前任务\r\n[共同约束](references/common.md)\r\n"
-                 "[应用选择](references/applications.md)\r\n[场景](references/scenario.md)\r\n").encode("utf-8")
+                 "[应用选择](references/applications.md)\r\n[场景](references/scenario.md)\r\n"
+                 "[可选定制](references/customization.md)\r\n").encode("utf-8")
             )
             (source / "references" / "scenario.md").write_text("# 场景指导\n", encoding="utf-8")
             (source / "agents" / "openai.yaml").write_bytes(
@@ -116,7 +118,7 @@ class PortableSkillsTests(unittest.TestCase):
         shutil.move(str(self.skill_output()), detached)
         content = (detached / "SKILL.md").read_text(encoding="utf-8")
         references = re.findall(r"\[[^]]*\]\(([^)]+)\)", content)
-        self.assertEqual(len(references), 3)
+        self.assertEqual(len(references), 4)
         for reference in references:
             target = (detached / reference).resolve()
             self.assertTrue(target.is_relative_to(detached.resolve()))

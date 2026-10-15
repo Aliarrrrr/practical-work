@@ -1,6 +1,6 @@
 {
   "name": "practical-work",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "repository": "https://github.com/Aliarrrrr/practical-work",
   "description": "Task-specific guidance for research, engineering, and artifact delivery, with shared constraints against unsupported claims and unnecessary process.",
   "skills": "./skills/",
